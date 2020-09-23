@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">X-Ray / Not X-Ray</string>
+    <string name="instructions">Tap the imageview to select a photo then tap Classify</string>
+</resources>

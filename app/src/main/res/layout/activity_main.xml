@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.touchmediaproductions.xrayornot.com.touchmediaproductions.xrayornot.MainActivity"
+    android:background="@color/colorBackground">
+
+
+    <TextView
+        android:id="@+id/result"
+        style="@style/TextAppearance.AppCompat.Large"
+        android:layout_width="244dp"
+        android:layout_height="32dp"
+        android:layout_above="@+id/textview_instruction"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:textAlignment="center"
+        android:text=""
+        android:padding="12dp" />
+
+    <TextView
+        android:id="@+id/textview_instruction"
+        android:layout_width="252dp"
+        android:layout_height="30dp"
+        android:layout_above="@+id/image"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:text="@string/instructions"
+        android:textColor="@color/colorWhiteText"
+        />
+
+    <ImageView
+        android:id="@+id/image"
+        android:layout_width="480dp"
+        android:layout_height="480dp"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:src="@color/colorAccent"
+        android:elevation="5dp"
+        android:tooltipText="Tap to Select a Photo"
+        />
+
+    <Button
+        android:id="@+id/btn_classify"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/image"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:text="classify"
+        android:backgroundTint="@color/colorPrimary"
+        android:textColor="@color/colorWhiteText"
+        />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/toggle_modelAorB"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btn_classify"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:padding="8dp"
+        android:text="Model Type"
+        android:textAppearance="@style/TextAppearance.AppCompat.Widget.Switch"
+        app:switchTextAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textOff="B"
+        android:textOn="A"
+        app:showText="true"
+        android:textColor="@color/colorWhiteText"
+        />
+
+</RelativeLayout>

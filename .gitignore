@@ -1,0 +1,53 @@
+# =====================================
+# Android Generated
+# =====================================
+
+.gradle
+.idea/
+.navigation/
+/local.properties
+/build
+captures/
+
+*.iml
+*.apk
+*.ap_
+*.dex
+*.log
+
+# =====================================
+# Generated Files
+# =====================================
+
+bin/
+gen/
+out/
+/captures
+
+# =====================================
+# OS Generated
+# =====================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.dbb
+
+# =====================================
+# Art/Binary Assets
+# =====================================
+*.jpg
+*.jpeg
+*.bmp
+*.gif
+*.tif
+*.ogg
+*.mp3
+*.wav
+*.fbx
+*.FBX
+*.max
+
