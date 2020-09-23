@@ -9,7 +9,6 @@ A (poc) android application to classify images into category of Chest X-Rays or 
 
 __Use case intended for when a user provides an image and image input validation is required before processing the image as a Chest X-Ray.__
 
-Trained from 500 Chest X-Ray images and 1000 normal random images (500 grayscale and 500 color).
 
 <p align="center">
   <img width="200" src="screenshots/screenshot02.png">
@@ -17,6 +16,10 @@ Trained from 500 Chest X-Ray images and 1000 normal random images (500 grayscale
 </p>
 API 26 - Oreo
 
+
+# Trained Models
+
+The trained models are TFlite models trained from 500 Chest X-Ray images and 1000 normal random images (500 grayscale and 500 color).
 The trained models can be obtained from the assets folder.
 
 |  Type  | Trained on Resolution |  Size |       Model      |
