@@ -11,6 +11,7 @@ __Use case intended for when a user provides an image and image input validation
 
 
 <p align="center">
+  <img width="200" src="screenshots/screenshot01.png">
   <img width="200" src="screenshots/screenshot02.png">
   <img width="200" src="screenshots/screenshot03.png">
 </p>
@@ -24,5 +25,6 @@ The trained models can be obtained from the assets folder.
 
 |  Type  | Trained on Resolution |  Size |       Model      |
 |:------:|:---------------------:|:-----:|:----------------:|
-| Float  |        500x500        |  40M  | [model_unquant.tflite](/app/src/main/assets/model_unquant.tflite)|
-| Quant  |        500x500        |  12M  | [model.tflite](/app/src/main/assets/model.tflite)|
+| Quant  |        500x500        | 739KB | A [model.tflite](/app/src/main/assets/model.tflite)|
+| Float  |        500x500        | 2.1M  | B [model_unquant.tflite](/app/src/main/assets/model_unquant.tflite)|
+

@@ -202,8 +202,8 @@ public class MLHelper {
         }
         @Override
         public String toString(){
-            return this.getFirst() + " | " + this.getFirstValue() + "\n"
-                    + this.getSecond() + " | " + this.getSecondValue();
+            return this.getFirst() + " | " + (int) this.getFirstValue() + "%\n"
+                    + this.getSecond() + " | " + (int) this.getSecondValue() + "%";
         }
     }
 
