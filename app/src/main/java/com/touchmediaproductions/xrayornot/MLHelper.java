@@ -24,6 +24,9 @@ import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -48,8 +51,8 @@ public class MLHelper {
     private float IMAGE_STD;
     private String MODELNAME;
 
-    private final float PROBABILITY_MEAN = 0.0f;
-    private static final float PROBABILITY_STD = 255.0f;
+    private float PROBABILITY_MEAN = 0.0f;
+    private float PROBABILITY_STD = 1.0f;
 
 
     private List<String> labels;
@@ -61,12 +64,16 @@ public class MLHelper {
         this.context = context;
 
         if(model == MODEL_A){
-            //Model A (float? - no quantisation or compression)
+            //Model a - Quantized
+            this.PROBABILITY_MEAN = 0.0f;
+            this.PROBABILITY_STD = 255.0f;
             this.IMAGE_MEAN = 0.0f;
             this.IMAGE_STD = 1.0f;
             this.MODELNAME = "model.tflite";
         } else if (model == MODEL_B){
-            //Model B (quant? - as model B underwent default tf quantisation)
+            //Model b - unquantized
+            this.PROBABILITY_MEAN = 0.0f;
+            this.PROBABILITY_STD = 1.0f;
             this.IMAGE_MEAN = 127.5f;
             this.IMAGE_STD = 127.5f;
             this.MODELNAME = "model_unquant.tflite";
@@ -76,7 +83,7 @@ public class MLHelper {
 
     }
 
-    public String runClassification(Bitmap bitmap){
+    public Prediction runClassification(Bitmap bitmap){
         if(!CLASSIFICATION_UNDERWAY) {
             CLASSIFICATION_UNDERWAY = true;
             Log.i("TFModel", "Classification initiated...");
@@ -104,7 +111,7 @@ public class MLHelper {
         } else {
             Log.i("TFModel", "Classification is already running.");
         }
-        return "";
+        return null;
     }
 
     private MappedByteBuffer loadmodelfile(Activity activity) throws IOException {
@@ -135,7 +142,7 @@ public class MLHelper {
         return new NormalizeOp(PROBABILITY_MEAN, PROBABILITY_STD);
     }
 
-    private String getResult(){
+    private Prediction getResult(){
         String result = "";
         try {
             labels = FileUtil.loadLabels(context, "labels.txt");
@@ -143,15 +150,61 @@ public class MLHelper {
             e.printStackTrace();
         }
         Map<String, Float> labeledProbability = new TensorLabel(labels, probabilityProcessor.process(outputProbabilityBuffer)).getMapWithFloatValue();
-        float maxValueInMap = (Collections.max(labeledProbability.values()));
+        tflite.close();
 
-        for (Map.Entry<String, Float> entry : labeledProbability.entrySet()){
-            if (entry.getValue() == maxValueInMap){
-                result = entry.getKey();
+        return new Prediction(labeledProbability);
+    }
+
+    public static class Prediction {
+        private String first = "";
+        private String second = "";
+        private float firstValue = 0;
+        private float secondValue = 0;
+        private Map<String, Float> sortedProbabilities;
+        public Prediction(Map<String, Float> probabilityMap){
+            this.sortedProbabilities = sortByValue(probabilityMap);
+            Object[] keyset = sortedProbabilities.keySet().toArray();
+            if(sortedProbabilities.size() > 0) {
+                this.first = (String) keyset[0];
+                this.firstValue = sortedProbabilities.get(this.first) * 100;
+            }
+            if(sortedProbabilities.size() > 1) {
+                this.second = (String) keyset[1];
+                this.secondValue = sortedProbabilities.get(this.second) * 100;
             }
         }
-        tflite.close();
-        return result;
+        private static Map<String, Float> sortByValue(Map<String, Float> unsortMap) {
+            List<Map.Entry<String, Float>> list =
+                    new LinkedList<>(unsortMap.entrySet());
+            Collections.sort(list, new Comparator<Map.Entry<String, Float>>() {
+                public int compare(Map.Entry<String, Float> o1,
+                                   Map.Entry<String, Float> o2) {
+                    return (o2.getValue()).compareTo(o1.getValue());
+                }
+            });
+            Map<String, Float> sortedMap = new LinkedHashMap<>();
+            for (Map.Entry<String, Float> entry : list) {
+                sortedMap.put(entry.getKey(), entry.getValue());
+            }
+            return sortedMap;
+        }
+        public String getFirst() {
+            return first;
+        }
+        public String getSecond() {
+            return second;
+        }
+        public float getFirstValue() {
+            return firstValue;
+        }
+        public float getSecondValue() {
+            return secondValue;
+        }
+        @Override
+        public String toString(){
+            return this.getFirst() + " | " + this.getFirstValue() + "\n"
+                    + this.getSecond() + " | " + this.getSecondValue();
+        }
     }
 
 }

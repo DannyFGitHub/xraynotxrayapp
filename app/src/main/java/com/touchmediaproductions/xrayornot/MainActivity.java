@@ -5,18 +5,18 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
-
-import com.touchmediaproductions.xrayornot.R;
 
 import java.io.IOException;
 
@@ -28,12 +28,14 @@ public class MainActivity extends AppCompatActivity {
     ImageView imageView;
     Button btnClassify;
     TextView classifyText;
+    TextView predictionDetails;
     SwitchCompat modelSwitch;
 
     MLHelper mlHelper;
 
     Uri imageuri;
     private Bitmap bitmap;
+    private ProgressBar loadingCircle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +45,12 @@ public class MainActivity extends AppCompatActivity {
         imageView = findViewById(R.id.image);
         btnClassify = findViewById(R.id.btn_classify);
         classifyText = findViewById(R.id.result);
+        predictionDetails = findViewById(R.id.predictiondetails);
         modelSwitch = findViewById(R.id.toggle_modelAorB);
+
+        loadingCircle = findViewById(R.id.loading);
+        loadingCircle.setIndeterminate(true);
+        loadingCircle.setVisibility(View.GONE);
 
         imageView.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -66,47 +73,77 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void runClassification() {
-        if(bitmap != null) {
+        if (bitmap != null) {
             //If mlHelper is null it has been cleared and is ready to be initiated.
-            if(mlHelper == null) {
-                try {
-                    //Get whether model is A or B
-                    int modelToUse = 0;
-                    if (modelSwitch.isChecked()) {
-                        modelToUse = MODEL_A;
-                    } else {
-                        modelToUse = MODEL_B;
+            if (mlHelper == null) {
+                loadingCircle.setVisibility(View.VISIBLE);
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+                        try {
+                            //Get whether model is A or B
+                            int modelToUse = 0;
+                            if (modelSwitch.isChecked()) {
+                                modelToUse = MODEL_A;
+                            } else {
+                                modelToUse = MODEL_B;
+                            }
+
+                            //Prepare the Machine Learning Helper
+                            mlHelper = new MLHelper(MainActivity.this, modelToUse);
+
+                            //Run Classification against bitmap image input:
+                            final MLHelper.Prediction result = mlHelper.runClassification(bitmap);
+
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    SystemClock.sleep(1000);
+                                    loadingCircle.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            loadingCircle.setVisibility(View.GONE);
+                                        }
+                                    });
+                                }
+                            }).start();
+
+                            //Display result
+                            classifyText.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    classifyText.setText(result.getFirst());
+                                    //If XRay then white else Not X-Ray another color
+                                    if (result.getFirst().contains("X-Ray")) {
+                                        classifyText.setTextColor(Color.WHITE);
+                                    } else if (result.getFirst().contains("Not X-Ray")) {
+                                        classifyText.setTextColor(Color.rgb(255, 165, 0));
+                                    }
+                                }
+                            });
+
+                            predictionDetails.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    predictionDetails.setText(result.toString());
+                                }
+                            });
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        //Clear mHelper as classification is finished.
+                        mlHelper = null;
                     }
-
-                    //Prepare the Machine Learning Helper
-                    mlHelper = new MLHelper(MainActivity.this, modelToUse);
-
-                    //Run Classification against bitmap image input:
-                    String result = mlHelper.runClassification(bitmap);
-
-                    //Display result
-                    classifyText.setText(result);
-
-                    //Make it red if COVID, blue if Normal and Orange if Pneumonia
-                    if (result.contains("X-Ray")) {
-                        classifyText.setTextColor(Color.WHITE );
-                    } else if (result.contains("Not X-Ray")) {
-                        classifyText.setTextColor(Color.rgb(255, 165, 0));
-                    }
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                //Clear mHelper as classification is finished.
-                mlHelper = null;
+                }).start();
+            } else {
+                Toast toast = new Toast(MainActivity.this);
+                toast.makeText(MainActivity.this, "Please choose a photo first.", Toast.LENGTH_SHORT).show();
             }
-        } else {
-            Toast toast = new Toast(MainActivity.this);
-            toast.makeText(MainActivity.this, "Please choose a photo first.", Toast.LENGTH_SHORT).show();
         }
     }
-
 
 
     @Override
